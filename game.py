@@ -23,6 +23,27 @@ class Player:
         self.ys1 = y*40
         self.ys2 = self.ys1+40
 
+class keyboardListener:
+    def init(self):
+        self.listener = keyboard.Listener(on_release=self.on_release)
+
+    def on_release(self, key):
+        self.Listener(key)
+
+    def setListener(self, on_event, callback):
+        self.on_event = on_event
+        self.callback = callback
+
+    def Listener(self, key):
+        self.on_event(key)
+        self.callback()
+
+    def start(self):
+        self.listener.start()
+
+    def stop(self):
+        self.listener.stop()
+
 class Game(tk.Frame):
     player = Player()
     aceptedMoves = {
@@ -39,7 +60,9 @@ class Game(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.lastCommand = ''
-        self.listener = keyboard.Listener(on_release=self.on_release)
+        self.listener = keyboardListener()
+        self.listener.setListener(self.setCommand, self.updateScreen)
+        self.listener.init()
         self.pack()
         Game.player.setPosition(2,3)
         self.listener.start()
@@ -72,14 +95,6 @@ class Game(tk.Frame):
         PLAYER = Game.player
         self.canvas.create_rectangle(0,0,800,800,fill="#32327F")
         self.canvas.create_rectangle(PLAYER.xs1,PLAYER.ys1,PLAYER.xs2,PLAYER.ys2, fill="green")
-
-    def on_release(self, key):
-        self.keyboardListener(key)
-
-    def keyboardListener(self, key):
-        self.setCommand(key)
-        self.updateScreen()
-        print(key)
     
     def updateScreen(self):
         if self.lastCommand == 'end':
