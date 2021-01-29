@@ -5,23 +5,24 @@ from pynput import keyboard
 rand = lambda x:int(random.random()*x)
 
 class Player:
-    def setPosition(self, x, y):
+    x=0
+    y=0 
+    def setPosition(self, x=x, y=y):
         self.x = x
         self.y = y
         self.xs1 = x*40
         self.ys1 = y*40
         self.xs2 = self.xs1+40
         self.ys2 = self.ys1+40
-    
-    def setX(self,x):
-        self.x = x
-        self.xs1 = x*40
-        self.xs2 = self.xs1+40
 
-    def setY(self,y):
-        self.y = y
-        self.ys1 = y*40
-        self.ys2 = self.ys1+40
+    def __init__(self, x=x, y=y):
+        self.setPosition(x=x,y=y)
+
+    def setX(self, x):
+        self.setPosition(x=x, y=self.y)
+
+    def setY(self, y):
+        self.setPosition(y=y, x=self.x)
 
 class keyboardListener:
     def init(self):
@@ -45,7 +46,7 @@ class keyboardListener:
         self.listener.stop()
 
 class Game(tk.Frame):
-    player = Player()
+    player = Player(2,3)
     ACEPTEDMOVES = {
             keyboard.Key.up: lambda play:play.setY((play.y-1)),
             keyboard.Key.down: lambda play:play.setY((play.y+1)),
@@ -64,7 +65,6 @@ class Game(tk.Frame):
         self.listener.setListener(self.setCommand, self.updateScreen)
         self.listener.init()
         self.pack()
-        self.player.setPosition(2,3)
         self.listener.start()
         self.initCanvas()
         self.renderGame()
@@ -79,7 +79,7 @@ class Game(tk.Frame):
         }
         try:
             if RULES[move]:
-                self.ACEPTEDMOVES[move](Game.player)
+                self.ACEPTEDMOVES[move](self.player)
                 print("moved player with {m}".format(m=move))
             print("Player x: {px} Player y: {py}".format(px=Game.player.x, py=Game.player.y))
             return True
