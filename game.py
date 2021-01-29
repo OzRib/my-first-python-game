@@ -46,14 +46,14 @@ class keyboardListener:
 
 class Game(tk.Frame):
     player = Player()
-    aceptedMoves = {
+    ACEPTEDMOVES = {
             keyboard.Key.up: lambda play:play.setY((play.y-1)),
             keyboard.Key.down: lambda play:play.setY((play.y+1)),
             keyboard.Key.left: lambda play:play.setX((play.x-1)),
             keyboard.Key.right: lambda play:play.setX((play.x+1))
     }
 
-    commands = {
+    COMMANDS = {
             keyboard.Key.esc: lambda self: Game.end(self)
     }
 
@@ -64,15 +64,23 @@ class Game(tk.Frame):
         self.listener.setListener(self.setCommand, self.updateScreen)
         self.listener.init()
         self.pack()
-        Game.player.setPosition(2,3)
+        self.player.setPosition(2,3)
         self.listener.start()
         self.initCanvas()
         self.renderGame()
 
     def movePlayer(self, move):
+        PLAYER = self.player
+        RULES = {
+                keyboard.Key.up: PLAYER.y>0,
+                keyboard.Key.down: PLAYER.y<19,
+                keyboard.Key.left: PLAYER.x>0,
+                keyboard.Key.right: PLAYER.x<19
+        }
         try:
-            Game.aceptedMoves[move](Game.player)
-            print("moved player with {m}".format(m=move))
+            if RULES[move]:
+                self.ACEPTEDMOVES[move](Game.player)
+                print("moved player with {m}".format(m=move))
             print("Player x: {px} Player y: {py}".format(px=Game.player.x, py=Game.player.y))
             return True
         except:
@@ -83,7 +91,7 @@ class Game(tk.Frame):
             pass
         else:
             try:
-                self.lastCommand = Game.commands[key](self)
+                self.lastCommand = self.COMMANDS[key](self)
             except:
                 pass
 
