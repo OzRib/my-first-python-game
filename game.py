@@ -23,11 +23,21 @@ class Fruit(Thing):
         print("A fruit was deleted")
 
 class Player(Thing):
+    steps = 0
+    stepsForAdd = (rand(33)+7)
     def setX(self, x):
         self.setPosition(x=x, y=self.y)
 
     def setY(self, y):
         self.setPosition(y=y, x=self.x)
+
+    def addStep(self):
+        self.steps+=1
+        print("Steps: {}".format(self.steps))
+
+    def stepReset(self):
+        self.steps=0
+        self.stepsForAdd = (rand(33)+7)
 
 class keyboardListener:
     def init(self):
@@ -51,8 +61,9 @@ class keyboardListener:
         self.listener.stop()
 
 class Game(tk.Frame):
+    points = 0
     player = Player(2,3)
-    fruits = {0:Fruit(5,6)}
+    fruits = [Fruit(5,6)]
     ACEPTEDMOVES = {
             keyboard.Key.up: lambda play:play.setY((play.y-1)),
             keyboard.Key.down: lambda play:play.setY((play.y+1)),
@@ -78,26 +89,45 @@ class Game(tk.Frame):
         self.renderGame()
     
     def addFruit(self, x,y):
-        self.fruits[len(self.fruits)] = Fruit(x,y)
+        self.fruits.append(Fruit(x,y))
         print("A fruit added")
 
     def checkPos(self):
         print('Player position (x,y): ({px},{py})'.format(px=Game.player.x, py=Game.player.y))
-        for fruitId in self.fruits:
-            FRUIT = self.fruits[fruitId]
+        for fruit in self.fruits:
             print('Fruit position (x,y): ({fx},{fy})'.format(fx=FRUIT.x, fy=FRUIT.y)) 
 
     def checkColision(self):
         PLAYER = self.player
-        for fruitId in self.fruits:
-            FRUIT = self.fruits[fruitId]
-            if FRUIT.x == PLAYER.x and FRUIT.y == PLAYER.y:
-                print("Colision in ({x},{y})".format(x=FRUIT.x, y=FRUIT.y))
-                self.removeFruit(fruitId)
-
+        for fruit in self.fruits:
+            if (fruit.x == PLAYER.x and fruit.y == PLAYER.y):
+                FRUITID = self.fruits.index(fruit)
+                print("Colision in ({x},{y})".format(x=fruit.x, y=fruit.y))
+                self.removeFruit(FRUITID)
+                self.checkNoHaveFruits()
+                self.points+=1
+    
+    def checkNoHaveFruits(self):
+        FRUITS = self.fruits
+        print("checking the fruits")
+        print(FRUITS)
+        if FRUITS == []:
+            print("No have fruits...\nAdding")
+            self.addFruit(rand(20),rand(20))
 
     def removeFruit(self, id):
         del self.fruits[id]
+    
+    def countSteps(self):
+        PLAYER = self.player
+        if PLAYER.steps == PLAYER.stepsForAdd:
+            self.player.stepReset()
+            self.addFruit(rand(20), rand(20))
+    
+    def actions(self):
+        self.checkColision()
+        self.player.addStep()
+        self.countSteps()
 
     def movePlayer(self, move):
         PLAYER = self.player
@@ -111,8 +141,9 @@ class Game(tk.Frame):
             if RULES[move]:
                 self.ACEPTEDMOVES[move](self.player)
                 print("moved player with {m}".format(m=move))
+            self.actions()
             print("Player x: {px} Player y: {py}".format(px=Game.player.x, py=Game.player.y))
-            self.checkColision()
+
             return True
         except:
             return False
@@ -132,11 +163,11 @@ class Game(tk.Frame):
 
     def renderGame(self):
         PLAYER = Game.player
-        self.canvas.create_rectangle(0,0,800,800,fill="#32327F")
-        for fruitId in Game.fruits:
-            FRUIT = Game.fruits[fruitId]
-            self.canvas.create_rectangle(FRUIT.xs1,FRUIT.ys1,FRUIT.xs2,FRUIT.ys2, fill="green")
-        self.canvas.create_rectangle(PLAYER.xs1,PLAYER.ys1,PLAYER.xs2,PLAYER.ys2, fill="white")
+        self.canvas.create_rectangle(0,0,800,800, fill="#32327F")
+        for fruit in Game.fruits:
+            self.canvas.create_rectangle(fruit.xs1,fruit.ys1,fruit.xs2,fruit.ys2, fill="green")
+        self.canvas.create_rectangle(PLAYER.xs1,PLAYER.ys1,PLAYER.xs2,PLAYER.ys2, fill="gray")
+        self.canvas.create_text(60,20, text="Points: {}".format(self.points), fill="white")
     
     def updateScreen(self):
         if self.lastCommand == 'end':
