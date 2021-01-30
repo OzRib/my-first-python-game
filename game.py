@@ -4,9 +4,12 @@ from pynput import keyboard
 
 rand = lambda x:int(random.random()*x)
 
-class Player:
+class Thing:
     x=0
-    y=0 
+    y=0
+    def __init__(self, x=x, y=y):
+        self.setPosition(x=x, y=y)
+
     def setPosition(self, x=x, y=y):
         self.x = x
         self.y = y
@@ -15,9 +18,11 @@ class Player:
         self.xs2 = self.xs1+40
         self.ys2 = self.ys1+40
 
-    def __init__(self, x=x, y=y):
-        self.setPosition(x=x,y=y)
+class Fruit(Thing):
+    def __del__(self):
+        print("A fruit was deleted")
 
+class Player(Thing):
     def setX(self, x):
         self.setPosition(x=x, y=self.y)
 
@@ -102,7 +107,7 @@ class Game(tk.Frame):
     def renderGame(self):
         PLAYER = Game.player
         self.canvas.create_rectangle(0,0,800,800,fill="#32327F")
-        self.canvas.create_rectangle(PLAYER.xs1,PLAYER.ys1,PLAYER.xs2,PLAYER.ys2, fill="green")
+        self.canvas.create_rectangle(PLAYER.xs1,PLAYER.ys1,PLAYER.xs2,PLAYER.ys2, fill="yellow")
     
     def updateScreen(self):
         if self.lastCommand == 'end':
