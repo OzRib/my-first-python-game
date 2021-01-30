@@ -52,6 +52,7 @@ class keyboardListener:
 
 class Game(tk.Frame):
     player = Player(2,3)
+    fruits = {0:Fruit(5,6)}
     ACEPTEDMOVES = {
             keyboard.Key.up: lambda play:play.setY((play.y-1)),
             keyboard.Key.down: lambda play:play.setY((play.y+1)),
@@ -60,7 +61,9 @@ class Game(tk.Frame):
     }
 
     COMMANDS = {
-            keyboard.Key.esc: lambda self: Game.end(self)
+            keyboard.Key.esc: lambda self: Game.end(self),
+            keyboard.Key.f4: lambda self: Game.addFruit(self, rand(20), rand(20)),
+            keyboard.Key.f10: lambda self: Game.checkPos(self)
     }
 
     def __init__(self, master=None):
@@ -73,6 +76,28 @@ class Game(tk.Frame):
         self.listener.start()
         self.initCanvas()
         self.renderGame()
+    
+    def addFruit(self, x,y):
+        self.fruits[len(self.fruits)] = Fruit(x,y)
+        print("A fruit added")
+
+    def checkPos(self):
+        print('Player position (x,y): ({px},{py})'.format(px=Game.player.x, py=Game.player.y))
+        for fruitId in self.fruits:
+            FRUIT = self.fruits[fruitId]
+            print('Fruit position (x,y): ({fx},{fy})'.format(fx=FRUIT.x, fy=FRUIT.y)) 
+
+    def checkColision(self):
+        PLAYER = self.player
+        for fruitId in self.fruits:
+            FRUIT = self.fruits[fruitId]
+            if FRUIT.x == PLAYER.x and FRUIT.y == PLAYER.y:
+                print("Colision in ({x},{y})".format(x=FRUIT.x, y=FRUIT.y))
+                self.removeFruit(fruitId)
+
+
+    def removeFruit(self, id):
+        del self.fruits[id]
 
     def movePlayer(self, move):
         PLAYER = self.player
@@ -87,6 +112,7 @@ class Game(tk.Frame):
                 self.ACEPTEDMOVES[move](self.player)
                 print("moved player with {m}".format(m=move))
             print("Player x: {px} Player y: {py}".format(px=Game.player.x, py=Game.player.y))
+            self.checkColision()
             return True
         except:
             return False
@@ -107,7 +133,10 @@ class Game(tk.Frame):
     def renderGame(self):
         PLAYER = Game.player
         self.canvas.create_rectangle(0,0,800,800,fill="#32327F")
-        self.canvas.create_rectangle(PLAYER.xs1,PLAYER.ys1,PLAYER.xs2,PLAYER.ys2, fill="yellow")
+        for fruitId in Game.fruits:
+            FRUIT = Game.fruits[fruitId]
+            self.canvas.create_rectangle(FRUIT.xs1,FRUIT.ys1,FRUIT.xs2,FRUIT.ys2, fill="green")
+        self.canvas.create_rectangle(PLAYER.xs1,PLAYER.ys1,PLAYER.xs2,PLAYER.ys2, fill="white")
     
     def updateScreen(self):
         if self.lastCommand == 'end':
